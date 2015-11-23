@@ -12,7 +12,9 @@ label:
 	pushl	$10
 	
 	call	nib_put_scr
+	addl	$12, %esp
 	jmp		label
+	
 	
 	call	nib_end
 
