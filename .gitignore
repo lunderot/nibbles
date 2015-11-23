@@ -1,0 +1,4 @@
+*.o
+nibbles
+nibbles_asm
+nibbles_asm_start

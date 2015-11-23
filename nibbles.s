@@ -6,10 +6,13 @@ start_game:
 	
 	call	nib_init
 	
-	pushl	$0
-	pushl	$0
+label:
 	pushl	$104
+	pushl	$10
+	pushl	$10
+	
 	call	nib_put_scr
+	jmp		label
 	
 	call	nib_end
 
