@@ -12,8 +12,8 @@ void start_game(int len, int n_apples)
 	nib_init();
 	
 	/*Constants*/
-	const int screenSizeX = 100;
-	const int screenSizeY = 100;
+	const int screenSizeX = 50;
+	const int screenSizeY = 50;
 	const int maxLen = 50;
 	const int maxApples = 100;
 	
@@ -27,10 +27,8 @@ void start_game(int len, int n_apples)
 	int i;
 	for (i = 0; i < len; i++)
 	{
-		//body[i].x = screenSizeX/2+i;
-		//body[i].y = screenSizeY/2;
-		body[i].x = i;
-		body[i].y = 0;
+		body[i].x = screenSizeX/2 - i;
+		body[i].y = screenSizeY/2;
 	}
 	
 	/*Init apples*/
@@ -103,18 +101,21 @@ void start_game(int len, int n_apples)
 		
 		
 		/*Draw snake*/
-		//printf("Start draw");
 		for (i = 0; i < currentLength; i++)
 		{
 			nib_put_scr(body[i].x, body[i].y, 'o');
-			//printf("%i, %i\n", body[i].x, body[i].y);
 		}
 		
 		/*Draw apples*/
-		
+		for (i = 0; i < maxApples; i++)
+		{
+			nib_put_scr(apples[i].x, apples[i].y, '*');
+		}
 		
 		/*Sleep*/
-		usleep(500000);
+		usleep(500000/2);
+		/*TODO: Get input while sleeping*/
+		clear();
 	}
 	
 	nib_end();
