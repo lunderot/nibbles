@@ -1,16 +1,11 @@
-.section .bss
-var:	.long	0
-
 .section .data
 
-
 .set CONSTANT, 20
+.set WORM_CHAR, 111
+.set APPLE_CHAR, 36
 
-
-wormChar:	.long	111
-appleChar:	.long	36
-nrOfApples: .long	0
-maxLength:	.long	0
+nrOfApples:		.long	0
+maxLength:		.long	0
 
 currentLength:	.long	0 #set to len
 direction:		.long	0
@@ -23,22 +18,17 @@ input:			.long	0xffffffff
 .globl start_game
 start_game:
 
-	popl	%eax
-	movl	%eax, var
-	
-	
-	
-	
-	
-	popl	%eax
-	
+	movl	4(%esp), %eax
+	movl	%eax, maxLength
+	movl	8(%esp), %eax
+	movl	%eax, nrOfApples
 	
 	call	nib_init
 	
 label: 
-
-	movl	$var, %eax
-	pushl	(%eax)
+	
+	movl	maxLength, %ebx
+	pushl	%ebx
 	pushl	$10
 	pushl	$10
 	
