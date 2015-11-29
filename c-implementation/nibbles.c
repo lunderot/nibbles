@@ -10,10 +10,10 @@ void start_game(int len, int n_apples)
 	nib_init();
 	
 	/*Constants*/
-	const int screenSizeX = 50;
-	const int screenSizeY = 50;
+	const int screenSize = 50;
 	const int maxLen = 50;
 	const int maxApples = 100;
+	const int sleepTime = 10000;
 	
 	int currentLength = len;
 	int direction = 0;
@@ -28,15 +28,15 @@ void start_game(int len, int n_apples)
 	int i;
 	for (i = 0; i < len; i++)
 	{
-		body[i].x = screenSizeX/2 - i;
-		body[i].y = screenSizeY/2;
+		body[i].x = screenSize/2 - i;
+		body[i].y = screenSize/2;
 	}
 	
 	/*Init apples*/
 	for (i = 0; i < n_apples; i++)
 	{
-		apples[i].x = rand() % screenSizeX;
-		apples[i].y = rand() % screenSizeY;
+		apples[i].x = rand() % screenSize;
+		apples[i].y = rand() % screenSize;
 	}
 	
 	while(!done)
@@ -68,8 +68,8 @@ void start_game(int len, int n_apples)
 				apples[i].y == body[0].y )
 			{
 				hit = 1;
-				apples[i].x = rand() % screenSizeX;
-				apples[i].y = rand() % screenSizeY;
+				apples[i].x = rand() % screenSize;
+				apples[i].y = rand() % screenSize;
 				break;
 			}
 		}
@@ -101,20 +101,10 @@ void start_game(int len, int n_apples)
 			}
 		}
 		/*Collision detection with walls*/
-		for (i = 0; i < screenSizeX; i++)
+		for (i = 0; i < screenSize; i++)
 		{
-			if (body[0].x == i &&
-				(body[0].y == 0 || body[0].y == screenSizeY)
-				)
-			{
-				done = 1;
-				break;
-			}
-		}
-		for (i = 0; i < screenSizeY; i++)
-		{
-			if (body[0].y == i &&
-				(body[0].x == 0 || body[0].x == screenSizeX)
+			if ((body[0].x == i && (body[0].y == 0 || body[0].y == screenSize)) ||
+				(body[0].y == i && (body[0].x == 0 || body[0].x == screenSize))
 				)
 			{
 				done = 1;
@@ -134,18 +124,15 @@ void start_game(int len, int n_apples)
 			nib_put_scr(apples[i].x, apples[i].y, '*');
 		}
 		/*Draw game borders*/
-		for (i = 0; i < screenSizeX; i++)
+		for (i = 0; i < screenSize; i++)
 		{
 			nib_put_scr(i, 0, '-');
-			nib_put_scr(i, screenSizeY, '-');
-		}
-		for (i = 0; i < screenSizeY; i++)
-		{
+			nib_put_scr(i, screenSize, '-');
 			nib_put_scr(0, i, '|');
-			nib_put_scr(screenSizeX, i, '|');
+			nib_put_scr(screenSize, i, '|');
 		}
 		
-		/*TODO: Get input while sleeping*/
+		/*Get input while sleeping*/
 		for (i = 0; i < 10; i++)
 		{
 			/*Get input*/
@@ -171,10 +158,10 @@ void start_game(int len, int n_apples)
 				break;
 			}
 			/*Sleep*/
-			usleep(100000/10);
+			usleep(sleepTime);
 		}
 		
-		usleep(100000/10*(10-i));
+		usleep(sleepTime*(10-i));
 		
 		clear();
 	}
