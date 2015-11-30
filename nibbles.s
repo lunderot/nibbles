@@ -5,7 +5,7 @@
 .set MAX_APPLES, 100
 
 .section .bss
-	body:	.fill WORM_MAX_LEN, 8	#Reserve space for worm body
+	body:	.space  WORM_MAX_LEN, 8	#Reserve space for worm body
 
 .section .data
 	nrOfApples:		.long	0
@@ -16,42 +16,36 @@
 	done:			.long	0
 	input:			.long	0xffffffff
 
-
 .section .text
 .globl start_game
 start_game:
-
-	#Move function arguments into memory
-	movl	4(%esp), %eax
-	movl	%eax, currentLength
-	movl	8(%esp), %eax
-	movl	%eax, nrOfApples
-	
-	#Init snake body
-	movl	(currentLength), %ecx
-bodyInit:
-	movl	body, %ebx	#Get the address of the body
-	movl	%ecx, %eax
-	imull	$2, %eax
-	addl	%eax, %ebx	#Calculate and get the right address
-	
-	
-	
-	loop	bodyInit
-	
-	
 	call	nib_init
+		
+	#Move function arguments into memory
+	#movl	4(%esp), %eax
+	#movl	%eax, currentLength
+	#movl	8(%esp), %eax
+	#movl	%eax, nrOfApples
 	
-label: 
+	movl $SCREEN_SIZE, %ecx
 	
-	movl	currentLength, %ebx
-	pushl	%ebx
-	pushl	$10
-	pushl	$10
+	xorl %eax, %eax
 	
-	call	nib_put_scr
-	addl	$12, %esp
-	jmp		label
-	
+	l5:
+			movl %ecx, %ebx
+			pushl	$111
+			pushl	$18
+			pushl	%ecx
+			
+			call	nib_put_scr	
+			addl	$12, %esp
+			
+			movl %ebx, %ecx
+	loop l5
+
+
+end:
+	pushl	$11100000
+	call 	usleep
 	call	nib_end
 

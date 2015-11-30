@@ -1,0 +1,33 @@
+
+	#Init snake body
+	xorl	%ecx, %ecx
+
+	
+initBody:
+	cmpl	currentLength, %ecx
+	
+	je		initApples
+	
+	movl	$8, %eax
+	mull	%ecx		#Calculate offset from ecx
+	movl	body, %ebx	#Get the address of the body
+	addl	%eax, %ebx	#Calculate and get the right address
+	
+	movl	SCREEN_SIZE, %eax	#Store 50 in eax
+	movl	$2, %esi
+	divl	%esi				#Divide eax with 2
+	
+	movl	%eax, 4(%ebx)		#Set body[i].y to SCREEN_SIZE/2
+	
+	subl	%ecx, %eax			#Subtract eax with loop variable
+	
+	movl	%eax, (%ebx)		#Set the body[i].x to SCREEN_SIZE/2 - i
+	
+	
+	
+	incl	%ecx
+	jmp		initBody
+	
+initApples:
+	
+	
