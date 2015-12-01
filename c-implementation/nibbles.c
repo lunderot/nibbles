@@ -28,8 +28,9 @@ void start_game(int len, int n_apples)
 	int i;
 	for (i = 0; i < len; i++)
 	{
-		body[i].x = screenSize/2 - i;
 		body[i].y = screenSize/2;
+		body[i].x = screenSize/2 - i;
+
 	}
 	
 	/*Init apples*/
