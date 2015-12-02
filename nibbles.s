@@ -17,10 +17,8 @@
 	done:			.long	0
 	input:			.long	0xffffffff
 	
-	NBRS:
-					.long	2
-					.long	3
-					.long	6
+	.local	x
+	.comm	x,800,64
 
 .section .text
 .globl start_game
@@ -33,31 +31,34 @@ start_game:
 	movl	8(%esp), %eax
 	movl	%eax, nrOfApples
 	
-	movl $2, %ecx
+	
+	movl $SCREEN_SIZE, %ecx
 	initApples:
 			
 			pushl	%ecx
 			
 			xorl	%eax, %eax
-			movl	$NBRS, %edi
-			addl	(%edi, %ecx, 4), %eax
-			movl	%eax, %ebx
-		
-			#movl	$apples, %ebx 		#ebx = apples address
-			#addl	(%ecx, 8), %ebx   	#ebx = 8 * i + ebx
-										#ebx is now the address of an apple
+			
+			movl	$apples, %ebx 				#ebx = apples address
+			#movl	(%edi, %ecx, 8), %eax   	#ebx = 8 * i + ebx
+			movl	%ecx, %eax
+			movl	$8, %ecx
+			mull	%ecx
+			addl	%eax, %ebx
+			#ebx is now the address of an apple
 										
-			#pushl	%ecx
-			#call	rand				#eax is now a random value
-			#popl	%ecx
 			
-			#movl	$SCREEN_SIZE, %edx
-			#divl	%edx				#edx = eax MOD edx
+			call	rand				#eax is now a random value
+
+			movl	$SCREEN_SIZE, %ecx
+			xorl	%edx, %edx
+			divl	%ecx				#edx = eax MOD ecx
 			
-			movl   0(%ebx), %eax		#Nått fel när vi räknar ut ebx
-			#pushl	4(%ebx)
+			movl    %edx, (%ebx)
+			movl    %edx, 4(%ebx)
 			
-			popl	%ecx	
+			popl	%ecx
+				
 	loop initApples
 	
 	
