@@ -32,7 +32,7 @@ start_game:
 	movl	%eax, nrOfApples
 	
 	
-	movl $SCREEN_SIZE, %ecx
+	movl nrOfApples, %ecx
 	initApples:
 			
 			pushl	%ecx
@@ -47,19 +47,53 @@ start_game:
 			addl	%eax, %ebx
 			#ebx is now the address of an apple
 										
-			
 			call	rand				#eax is now a random value
-
 			movl	$SCREEN_SIZE, %ecx
 			xorl	%edx, %edx
 			divl	%ecx				#edx = eax MOD ecx
 			
 			movl    %edx, (%ebx)
+			
+			
+			call	rand
+			movl	$SCREEN_SIZE, %ecx
+			xorl	%edx, %edx
+			divl	%ecx				#edx = eax MOD ecx
+			
 			movl    %edx, 4(%ebx)
 			
 			popl	%ecx
 				
 	loop initApples
+	
+	movl nrOfApples, %ecx
+	drawApples:
+			
+			pushl	%ecx
+			
+			xorl	%eax, %eax
+			
+			movl	$apples, %ebx 				#ebx = apples address
+			#movl	(%edi, %ecx, 8), %eax   	#ebx = 8 * i + ebx
+			movl	%ecx, %eax
+			movl	$8, %ecx
+			mull	%ecx
+			addl	%eax, %ebx
+			#ebx is now the address of an apple
+			
+			pushl	$APPLE_CHAR						
+			movl    (%ebx), %eax
+			pushl	%eax
+			movl    4(%ebx), %eax
+			pushl	%eax
+	
+			call	nib_put_scr	
+			addl	$12, %esp
+			
+			popl	%ecx
+				
+	loop drawApples
+	
 	
 	
 	
