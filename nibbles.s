@@ -60,14 +60,13 @@ start_game:
 	loop initApples
 	
 ############################## Init body ###############################
-	movl currentLength, %ecx
+	xorl	%ecx, %ecx
 	initBody:		
 	pushl	%ecx
 			
 		xorl	%eax, %eax
 			
 		movl	$body, %ebx 				#ebx = body address
-		
 		movl	%ecx, %eax
 		movl	$8, %ecx
 		mull	%ecx
@@ -79,12 +78,14 @@ start_game:
 		movl	$2, %ecx
 		divl	%ecx						#eax is now screenSize/2
 		
-		movl    %eax, -8(%ebx)				#x = screenSize/2
+		movl    %eax, (%ebx)				#x = screenSize/2
 	popl	%ecx							#y = screenSize/2 + i
 		addl	%ecx, %eax
-		movl    %eax, -4(%ebx)
-				
-	loop initBody
+		movl    %eax, 4(%ebx)
+	
+	incl	%ecx
+	cmpl currentLength, %ecx	
+	jne initBody
 		
 ############################# Draw apples ##############################
 	movl nrOfApples, %ecx
@@ -113,10 +114,10 @@ start_game:
 	loop drawApples
 	
 ############################## Draw body ###############################
-	movl currentLength, %ecx
+	xorl	%ecx, %ecx
 	drawBody:		
-	pushl	%ecx	
-	
+	pushl	%ecx
+			
 		xorl	%eax, %eax
 			
 		movl	$body, %ebx 				#ebx = body address
@@ -125,18 +126,17 @@ start_game:
 		mull	%ecx
 		addl	%eax, %ebx					#ebx = 8 * i + ebx
 											#ebx is now the address of a body part
-										
+		
 		pushl	$WORM_CHAR
-		movl    -4(%ebx), %eax				#y
-		pushl	%eax
-		movl    -8(%ebx), %eax				#x
-		pushl	%eax
-
+		pushl   4(%ebx)						#y
+		pushl   (%ebx)						#x
 		call	nib_put_scr	
 		addl	$12, %esp
-		
-	popl	%ecx		
-	loop drawBody
+	
+	popl	%ecx
+	incl	%ecx
+	cmpl currentLength, %ecx	
+	jne drawBody
 	
 ############################# Draw borders #############################
 	movl $SCREEN_SIZE, %ecx
