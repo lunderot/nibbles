@@ -4,22 +4,31 @@
 .set SCREEN_SIZE, 50
 .set MAX_APPLES, 100
 
+.set KEY_UP, 259
+.set KEY_RIGHT, 261
+.set KEY_DOWN, 258
+.set KEY_LEFT, 260
+
 .section .bss
 	body:	.fill  WORM_MAX_LEN, 8	#Reserve space for worm body
 	apples:	.fill  MAX_APPLES, 8 	#Reserve space for apples
 
 .section .data
-	nrOfApples:		.long	0
 
+	nrOfApples:		.long	0
 	currentLength:	.long	0 #set to len
-	direction:		.long	0
 	hit:			.long	0
 	done:			.long	0
-	input:			.long	0xffffffff
+	input:			.long	KEY_UP
 
 .section .text
 .globl start_game
 start_game:
+
+########################################################################
+################################ Init ##################################
+########################################################################
+
 	call	nib_init
 		
 	#Move function arguments into memory
@@ -86,7 +95,87 @@ start_game:
 	incl	%ecx
 	cmpl currentLength, %ecx	
 	jne initBody
+	
+########################################################################
+############################## Main loop ###############################
+########################################################################
+
+	mainLoop:
+
+############################# Update body ##############################
+
 		
+		movl	$body, %ebx 				#ebx = body address
+		pushl	(%ebx)						#pushl head x-value
+		pushl	4(%ebx)						#pushl head y-value
+		
+		cmpl	$KEY_UP, input
+		je 		moveUp
+	
+		cmpl	$KEY_RIGHT, input
+		je 		moveRight
+	
+		cmpl	$KEY_DOWN, input
+		je 		moveDown
+	
+		cmpl	$KEY_LEFT, input
+		je 		moveLeft
+	
+
+	moveUp:
+		decl	4(%ebx)
+		jmp endMove
+	
+	moveRight:
+		incl	(%ebx)	
+		jmp endMove
+	
+	moveDown:
+		incl	4(%ebx)	
+		jmp endMove
+	
+	moveLeft:
+		decl	(%ebx)
+		jmp endMove	
+
+	endMove:		
+
+	/*	#Looping through and moving the rest of the body
+		movl	$1, %ecx
+		moveBody:		
+		pushl	%ecx
+			
+			xorl	%eax, %eax
+			
+			movl	$body, %ebx 				#ebx = body address
+			movl	%ecx, %eax
+			movl	$8, %ecx
+			mull	%ecx
+			addl	%eax, %ebx					#ebx = 8 * i + ebx
+											#ebx is now the address of a body part
+		
+			popl	%eax						#eax = y-value from previous body part
+			popl	%ecx						#ecx = x-value from previous body part
+			
+			pushl   (%ebx)						#pushl current x-value to the next iteration
+			pushl   4(%ebx)						#pushl current y-value to the next iteration
+			
+			movl	%ecx, 4(%ebx)				#set new x-value to ecx
+			movl	%eax, (%ebx)				#set new y-value to eax
+			
+		popl	%ecx
+		incl	%ecx
+		cmpl currentLength, %ecx	
+		jne moveBody
+*/
+		addl	$8, %esp
+
+
+
+
+
+
+	
 ############################# Draw apples ##############################
 	movl nrOfApples, %ecx
 	drawApples:
@@ -171,10 +260,21 @@ start_game:
 						
 	popl 	%ecx	
 	loop drawBorders
+	
+############################## Get input ###############################
+
+	call	nib_poll_kbd
+	movl	%eax, input
+	
+	
+
+	pushl	$1000000
+	call 	usleep
+	addl	$4, %esp
+	call	clear
+jmp mainLoop
 
 ############################### End game ###############################	
 end:
-	pushl	$11100000
-	call 	usleep
 	call	nib_end
 
