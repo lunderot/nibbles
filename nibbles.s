@@ -6,7 +6,7 @@
 
 .section .bss
 	body:	.fill  WORM_MAX_LEN, 8	#Reserve space for worm body
-	apples:	.fill  MAX_APPLES, 8	#Reserve space for apples
+	apples:	.fill  MAX_APPLES, 8 	#Reserve space for apples
 
 .section .data
 	nrOfApples:		.long	0
@@ -64,34 +64,35 @@ start_game:
 	loop initApples
 	
 ############################## Init body ###############################
-	xorl	%ecx, %ecx						#Loop from 0 to currentLength
+	movl currentLength, %ecx
 	initBody:
-	pushl	%ecx
-		
+			
+		pushl	%ecx
+			
 		xorl	%eax, %eax
 			
 		movl	$body, %ebx 				#ebx = body address
+		
 		movl	%ecx, %eax
 		movl	$8, %ecx
 		mull	%ecx
-		addl	%eax, %ebx					#ebx is now the address of a body part
-		
+		addl	%eax, %ebx					#ebx = 8 * i + ebx
+											#ebx is now the address of a body part
+			
 		xorl	%edx, %edx
 		movl	$SCREEN_SIZE, %eax
 		movl	$2, %ecx
 		divl	%ecx						#eax is now screenSize/2
 		
-		
-		
-		movl    %eax, (%ebx)				#x = screenSize/2
+		movl    %eax, -8(%ebx)				#x = screenSize/2
 		popl	%ecx						#y = screenSize/2 + i
 		addl	%ecx, %eax
-		movl    %edx, 4(%ebx)
-		
-
-	incl	%ecx
-	cmpl	currentLength, %ecx
-	jne		initBody
+		movl    %eax, -4(%ebx)
+				
+	loop initBody
+	
+	
+	
 		
 ############################# Draw apples ##############################
 	movl nrOfApples, %ecx
@@ -123,33 +124,69 @@ start_game:
 	loop drawApples
 	
 ############################## Draw body ###############################
-	xorl	%ecx, %ecx						#Loop from 0 to currentLength
+	#xorl	%ecx, %ecx						#Loop from 0 to currentLength
+	#drawBody:
+	#pushl	%ecx
+			
+	#	xorl	%eax, %eax
+			
+	#	movl	$body, %ebx 				#ebx = body address
+	#	movl	%ecx, %eax
+	#	movl	$8, %ecx
+	#	mull	%ecx
+	#	addl	%eax, %ebx					#ebx = 8 * i + ebx
+											#ebx is now the address of a body
+		
+	#	pushl	$WORM_CHAR
+	#	movl    4(%ebx), %eax				#y
+	#	pushl	%eax
+	#	movl    (%ebx), %eax				#x
+	#	pushl	%eax
+
+	#	call	nib_put_scr	
+	#	addl	$12, %esp
+	
+	#popl	%ecx
+	#incl	%ecx
+	#cmpl	currentLength, %ecx
+	#jne		drawBody
+	
+	
+	movl currentLength, %ecx
 	drawBody:
-	pushl	%ecx
+			
+		pushl	%ecx
 			
 		xorl	%eax, %eax
 			
+		movl	$body, %ebx 				#ebx = body address
 		
-		movl	$body, %ebx 				#ebx = apples address
 		movl	%ecx, %eax
 		movl	$8, %ecx
 		mull	%ecx
 		addl	%eax, %ebx					#ebx = 8 * i + ebx
-											#ebx is now the address of an apple
-		
+											#ebx is now the address of a body part
+										
 		pushl	$WORM_CHAR
-		movl    4(%ebx), %eax				#y
+		movl    -4(%ebx), %eax				#y
 		pushl	%eax
-		movl    (%ebx), %eax				#x
+		movl    -8(%ebx), %eax				#x
 		pushl	%eax
 
 		call	nib_put_scr	
 		addl	$12, %esp
+		
+		popl	%ecx
+				
+	loop drawBody
 	
-	popl	%ecx
-	incl	%ecx
-	cmpl	currentLength, %ecx
-	jne		drawBody
+	
+	
+	
+	
+	
+	
+	
 	
 ############################# Draw borders #############################
 	movl $SCREEN_SIZE, %ecx
