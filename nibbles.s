@@ -104,73 +104,61 @@ start_game:
 
 ############################# Update body ##############################
 
-		
+	#Looping through and moving the rest of the body
+	movl	$1, %ecx
+	moveBody:		
+	pushl	%ecx
+			
+		xorl	%eax, %eax
+		xorl	%edx, %edx
+			
 		movl	$body, %ebx 				#ebx = body address
-		pushl	(%ebx)						#pushl head x-value
-		pushl	4(%ebx)						#pushl head y-value
+		movl	%ecx, %eax
+		movl	$8, %ecx
+		mull	%ecx
+		addl	%eax, %ebx					#ebx = 8 * i + ebx
+												#ebx is now the address of a body part
 		
-		cmpl	$KEY_UP, input
-		je 		moveUp
+		movl	-4(%ebx), %eax				#eax = y-value from previous body part
+		movl	-8(%ebx), %ecx				#ecx = x-value from previous body part
+			
+		movl	%ecx, (%ebx)				#set new x-value to ecx
+		movl	%eax, 4(%ebx)				#set new y-value to eax
+			
+	popl	%ecx
+	incl	%ecx
+	cmpl currentLength, %ecx	
+	jne moveBody
 	
-		cmpl	$KEY_RIGHT, input
-		je 		moveRight
-	
-		cmpl	$KEY_DOWN, input
-		je 		moveDown
-	
-		cmpl	$KEY_LEFT, input
-		je 		moveLeft
-	
+	movl	$body, %ebx
 
+	cmpl	$KEY_UP, input
+	je 		moveUp
+	
+	cmpl	$KEY_RIGHT, input
+	je 		moveRight
+	
+	cmpl	$KEY_DOWN, input
+	je 		moveDown
+	
+	cmpl	$KEY_LEFT, input
+	je 		moveLeft
+	
 	moveUp:
 		decl	4(%ebx)
 		jmp endMove
-	
 	moveRight:
-		incl	(%ebx)	
-		jmp endMove
-	
+		incl	(%ebx)
+		jmp endMove	
 	moveDown:
-		incl	4(%ebx)	
-		jmp endMove
-	
+		incl	4(%ebx)
+		jmp endMove	
 	moveLeft:
 		decl	(%ebx)
-		jmp endMove	
-
-	endMove:		
-
-	/*	#Looping through and moving the rest of the body
-		movl	$1, %ecx
-		moveBody:		
-		pushl	%ecx
-			
-			xorl	%eax, %eax
-			
-			movl	$body, %ebx 				#ebx = body address
-			movl	%ecx, %eax
-			movl	$8, %ecx
-			mull	%ecx
-			addl	%eax, %ebx					#ebx = 8 * i + ebx
-											#ebx is now the address of a body part
+		jmp endMove
 		
-			popl	%eax						#eax = y-value from previous body part
-			popl	%ecx						#ecx = x-value from previous body part
-			
-			pushl   (%ebx)						#pushl current x-value to the next iteration
-			pushl   4(%ebx)						#pushl current y-value to the next iteration
-			
-			movl	%ecx, 4(%ebx)				#set new x-value to ecx
-			movl	%eax, (%ebx)				#set new y-value to eax
-			
-		popl	%ecx
-		incl	%ecx
-		cmpl currentLength, %ecx	
-		jne moveBody
-*/
-		addl	$8, %esp
-
-
+	
+	endMove:
 
 
 
@@ -263,12 +251,47 @@ start_game:
 	
 ############################## Get input ###############################
 
-	call	nib_poll_kbd
-	movl	%eax, input
-	
-	
+	movl	$10, %ecx
+	xorl	%eax, %eax
 
-	pushl	$1000000
+	inputLoop:								#Check for input during sleep
+	pushl %ecx	
+		
+		pushl	$50000
+		call 	usleep
+		addl	$4, %esp
+	
+		call	nib_poll_kbd
+		
+		cmpl	$KEY_UP, %eax
+		je		registerInput
+		
+		cmpl	$KEY_RIGHT, %eax
+		je		registerInput
+		
+		cmpl	$KEY_DOWN, %eax
+		je		registerInput
+		
+		cmpl	$KEY_LEFT, %eax
+		je		registerInput
+		
+	popl	%ecx
+	loop inputLoop
+
+	jmp	skipInput
+	
+	registerInput:							#If input is registered, set input variable
+		movl	%eax, input
+	
+	skipInput:
+	
+	movl	$10, %ebx
+	subl	%ecx, %ebx
+	
+	movl	$50000, %eax
+	mull	%ebx
+	
+	pushl	%eax
 	call 	usleep
 	addl	$4, %esp
 	call	clear
