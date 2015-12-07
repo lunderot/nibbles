@@ -100,7 +100,56 @@ start_game:
 ########################################################################
 
 	mainLoop:
+
+######################## Collision with borders ########################
+	movl	$body, %ebx
+	cmpl	$0, (%ebx)
+	je		end
+	cmpl	$SCREEN_SIZE, (%ebx)
+	je		end
+	cmpl	$0, 4(%ebx)
+	je		end
+	cmpl	$SCREEN_SIZE, 4(%ebx)
+	je		end
 	
+######################### Collision with body ##########################
+	#Looping through and testing collision with body
+	movl	currentLength, %ecx
+	collisionBody:	
+	pushl	%ecx
+	cmpl	$1, %ecx
+	je		collisionBodyDone
+			
+		xorl	%eax, %eax
+			
+		movl	$body, %ebx 				#ebx = apples address
+		movl	%ecx, %eax
+		movl	$8, %ecx
+		mull	%ecx
+		addl	%eax, %ebx					#ebx = 8 * i + ebx
+											#ebx is now the address of an apple
+		movl	$body, %eax					#eax is the address of the head
+		
+		
+		movl	(%eax), %ecx				#Check apple position X with head X
+		cmpl	%ecx, -8(%ebx)
+		jne		notEqual2
+		
+		movl	4(%eax), %ecx				#Check apple position Y with head Y
+		cmpl	%ecx, -4(%ebx)
+		jne		notEqual2
+				
+											#If X and Y is equal, move apple
+		jmp		end
+		
+		
+	notEqual2:		
+	popl	%ecx
+	
+	loop	collisionBody
+	
+collisionBodyDone:
+
 ######################### Collision with apples ########################
 	movl	$0, hit
 	movl	nrOfApples, %ecx
