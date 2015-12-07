@@ -105,7 +105,7 @@ start_game:
 ############################# Update body ##############################
 
 	#Looping through and moving the rest of the body
-	movl	$1, %ecx
+	movl	currentLength, %ecx
 	moveBody:		
 	pushl	%ecx
 			
@@ -124,11 +124,13 @@ start_game:
 			
 		movl	%ecx, (%ebx)				#set new x-value to ecx
 		movl	%eax, 4(%ebx)				#set new y-value to eax
-			
+	
 	popl	%ecx
-	incl	%ecx
-	cmpl currentLength, %ecx	
-	jne moveBody
+	cmpl	$1, %ecx	
+	je  	moveBodyDone
+	loop moveBody
+	
+	moveBodyDone:
 	
 	movl	$body, %ebx
 
