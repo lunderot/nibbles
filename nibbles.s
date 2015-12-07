@@ -18,7 +18,6 @@
 	nrOfApples:		.long	0
 	currentLength:	.long	0 #set to len
 	hit:			.long	0
-	done:			.long	0
 	input:			.long	KEY_UP
 
 .section .text
@@ -101,9 +100,74 @@ start_game:
 ########################################################################
 
 	mainLoop:
-
+	
+######################### Collision with apples ########################
+	movl	$0, hit
+	movl	nrOfApples, %ecx
+	collisionApples:	
+	pushl	%ecx
+			
+		xorl	%eax, %eax
+			
+		movl	$apples, %ebx 				#ebx = apples address
+		movl	%ecx, %eax
+		movl	$8, %ecx
+		mull	%ecx
+		addl	%eax, %ebx					#ebx = 8 * i + ebx
+											#ebx is now the address of an apple
+		movl	$body, %eax					#eax is the address of the head
+		
+		
+		movl	(%eax), %ecx				#Check apple position X with head X
+		cmpl	%ecx, -8(%ebx)
+		jne		notEqual
+		
+		movl	4(%eax), %ecx				#Check apple position Y with head Y
+		cmpl	%ecx, -4(%ebx)
+		jne		notEqual
+				
+											#If X and Y is equal, move apple
+		movl	$1, hit
+		call	rand						#eax is now a random value
+		movl	$SCREEN_SIZE, %ecx
+		xorl	%edx, %edx
+		divl	%ecx						#edx = eax MOD ecx
+			
+		movl    %edx, -4(%ebx)
+			
+		call	rand
+		movl	$SCREEN_SIZE, %ecx
+		xorl	%edx, %edx
+		divl	%ecx						#edx = eax MOD ecx
+			
+		movl    %edx, -8(%ebx)
+		
+		jmp		growBody
+	
+	notEqual:		
+	popl	%ecx		
+	loop	collisionApples
+	jmp 	updateBody
+	
+	growBody:								#Apple was eaten, grow the worm
+	cmpl	$1, hit
+	jne		updateBody
+	
+	movl	$body, %ebx 				
+	movl	currentLength, %eax
+	movl	$8, %ecx
+	mull	%ecx
+	addl	%eax, %ebx						
+											#ebx is now the address of the new body part
+	
+	movl	-4(%ebx), %eax				#eax = y-value from previous body part
+	movl	-8(%ebx), %ecx				#ecx = x-value from previous body part
+			
+	movl	%ecx, (%ebx)				#set new x-value to ecx
+	movl	%eax, 4(%ebx)				#set new y-value to eax
+	
 ############################# Update body ##############################
-
+	updateBody:
 	#Looping through and moving the rest of the body
 	movl	currentLength, %ecx
 	moveBody:		
@@ -132,7 +196,7 @@ start_game:
 	
 	moveBodyDone:
 	
-	movl	$body, %ebx
+	movl	$body, %ebx						
 
 	cmpl	$KEY_UP, input
 	je 		moveUp
@@ -145,7 +209,7 @@ start_game:
 	
 	cmpl	$KEY_LEFT, input
 	je 		moveLeft
-	
+											#Move head
 	moveUp:
 		decl	4(%ebx)
 		jmp endMove
@@ -161,12 +225,14 @@ start_game:
 		
 	
 	endMove:
-
-
-
-
 	
+	cmpl	$1, hit
+	jne		noHit
+	incl	currentLength
+	
+	noHit:
 ############################# Draw apples ##############################
+	
 	movl nrOfApples, %ecx
 	drawApples:
 	pushl	%ecx	
@@ -259,7 +325,7 @@ start_game:
 	inputLoop:								#Check for input during sleep
 	pushl %ecx	
 		
-		pushl	$50000
+		pushl	$10000
 		call 	usleep
 		addl	$4, %esp
 	
@@ -290,7 +356,7 @@ start_game:
 	movl	$10, %ebx
 	subl	%ecx, %ebx
 	
-	movl	$50000, %eax
+	movl	$10000, %eax
 	mull	%ebx
 	
 	pushl	%eax
